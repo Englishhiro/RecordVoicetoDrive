@@ -63,6 +63,7 @@
         let recognition;
         let startTime;
         let inactivityTimeout;
+        let durationTimeout;
         let shouldRestartRecognition = true;
 
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -76,6 +77,7 @@
                 status.innerHTML = 'Recording <span class="microphone-icon">🎤</span>';
                 startTime = new Date().getTime();
                 resetInactivityTimeout();
+                resetDurationTimeout();
             };
 
             recognition.onresult = function(event) {
@@ -108,12 +110,12 @@
                 shouldRestartRecognition = false;
                 recognition.stop();
                 isRecording = false;
-                recordButton.innerHTML = '<img src="https://img.icons8.com/fluency/96/000000/microphone.png" alt="Start Recording">';
+                recordButton.innerHTML = '<img src="https://img.icons8.com/color/96/000000/microphone.png" alt="Start Recording">';
             } else {
                 recognition.start();
                 isRecording = true;
                 shouldRestartRecognition = true;
-                recordButton.innerHTML = '<img src="https://img.icons8.com/fluency/96/000000/stop.png" alt="Stop Recording">';
+                recordButton.innerHTML = '<img src="/mnt/data/image.png" alt="Stop Recording">';
             }
         });
 
@@ -123,7 +125,7 @@
             const user = 'User1'; // Replace with dynamic user info if needed
             const exerciseId = 'exercise1'; // Replace with dynamic exercise ID if needed
             const transcript = transcription.innerText;
-            const url = 'https://script.google.com/macros/s/AKfycbzVd_VM-oFQKf4-Fg1FvU5byyouthW3GKYmeivz0wrRES7N9pb7yOFjTc5s6mjT9H-0gg/exec';
+            const url = 'https://script.google.com/macros/s/AKfycbxIjQxkIUJxaF8Gi97EuiwiIsnxmZB4DemoPpWGrDRqf3e7D8ooHWB2-vFlHBL_DtG5Hg/exec';
             const data = {
                 timestamp: new Date().toISOString(),
                 user: user,
@@ -153,8 +155,20 @@
                 shouldRestartRecognition = false;
                 recognition.stop();
                 isRecording = false;
-                recordButton.innerHTML = '<img src="https://img.icons8.com/fluency/96/000000/microphone.png" alt="Start Recording">';
-            }, 10000); // 10 seconds of inactivity
+                recordButton.innerHTML = '<img src="https://img.icons8.com/color/96/000000/microphone.png" alt="Start Recording">';
+                status.innerHTML = 'Recording stopped due to inactivity';
+            }, 5000); // 5 seconds of inactivity
+        }
+
+        function resetDurationTimeout() {
+            clearTimeout(durationTimeout);
+            durationTimeout = setTimeout(() => {
+                shouldRestartRecognition = false;
+                recognition.stop();
+                isRecording = false;
+                recordButton.innerHTML = '<img src="https://img.icons8.com/color/96/000000/microphone.png" alt="Start Recording">';
+                status.innerHTML = 'Recording stopped due to long duration';
+            }, 300000); // 5 minutes duration
         }
     </script>
 </body>
