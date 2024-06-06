@@ -17,19 +17,19 @@
             background-color: #f0f0f0;
         }
         h1 {
-            font-size: 1.5em;
-            margin: 20px 0;
+            font-size: 2em;
+            margin: 10px 0;
         }
         #status {
-            font-size: 1em;
-            margin-top: 10px;
+            font-size: 0.8em;
+            margin-top: 5px;
         }
         .microphone-icon {
-            font-size: 1.5em;
+            font-size: 1em;
             color: red;
         }
         #transcription {
-            margin-top: 20px;
+            margin-top: 10px;
             border: 1px solid #ccc;
             padding: 10px;
             width: 90%;
@@ -42,15 +42,15 @@
             cursor: pointer;
         }
         button img {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
         }
     </style>
 </head>
 <body>
     <h1>Recording trial</h1>
     <button id="recordButton">
-        <img src="start.png" alt="Start Recording">
+        <img src="https://img.icons8.com/color/96/000000/microphone.png" alt="Start Recording">
     </button>
     <div id="status"></div>
     <div id="transcription"></div>
@@ -62,6 +62,8 @@
         let isRecording = false;
         let recognition;
         let startTime;
+        let inactivityTimeout;
+        let shouldRestartRecognition = true;
 
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -73,6 +75,7 @@
             recognition.onstart = function() {
                 status.innerHTML = 'Recording <span class="microphone-icon">🎤</span>';
                 startTime = new Date().getTime();
+                resetInactivityTimeout();
             };
 
             recognition.onresult = function(event) {
@@ -81,6 +84,7 @@
                     transcript += event.results[i][0].transcript;
                 }
                 transcription.innerText = transcript;
+                resetInactivityTimeout();
             };
 
             recognition.onerror = function(event) {
@@ -88,7 +92,7 @@
             };
 
             recognition.onend = function() {
-                if (isRecording) {
+                if (shouldRestartRecognition && isRecording) {
                     recognition.start();
                 } else {
                     status.innerHTML = '';
@@ -101,13 +105,15 @@
 
         recordButton.addEventListener('click', () => {
             if (isRecording) {
+                shouldRestartRecognition = false;
                 recognition.stop();
                 isRecording = false;
-                recordButton.innerHTML = '<img src="start.png" alt="Start Recording">';
+                recordButton.innerHTML = '<img src="https://img.icons8.com/fluency/96/000000/microphone.png" alt="Start Recording">';
             } else {
                 recognition.start();
                 isRecording = true;
-                recordButton.innerHTML = '<img src="stop.png" alt="Stop Recording">';
+                shouldRestartRecognition = true;
+                recordButton.innerHTML = '<img src="https://img.icons8.com/fluency/96/000000/stop.png" alt="Stop Recording">';
             }
         });
 
@@ -117,13 +123,13 @@
             const user = 'User1'; // Replace with dynamic user info if needed
             const exerciseId = 'exercise1'; // Replace with dynamic exercise ID if needed
             const transcript = transcription.innerText;
-            const url = 'https://script.google.com/macros/s/AKfycbxIjQxkIUJxaF8Gi97EuiwiIsnxmZB4DemoPpWGrDRqf3e7D8ooHWB2-vFlHBL_DtG5Hg/exec';
+            const url = 'https://script.google.com/macros/s/AKfycbzVd_VM-oFQKf4-Fg1FvU5byyouthW3GKYmeivz0wrRES7N9pb7yOFjTc5s6mjT9H-0gg/exec';
             const data = {
                 timestamp: new Date().toISOString(),
                 user: user,
                 exerciseId: exerciseId,
                 duration: duration,
-                isOfficial: 0,
+                score: 0,
                 transcript: transcript
             };
 
@@ -139,6 +145,16 @@
             }).catch(error => {
                 console.error('Error logging data:', error);
             });
+        }
+
+        function resetInactivityTimeout() {
+            clearTimeout(inactivityTimeout);
+            inactivityTimeout = setTimeout(() => {
+                shouldRestartRecognition = false;
+                recognition.stop();
+                isRecording = false;
+                recordButton.innerHTML = '<img src="https://img.icons8.com/fluency/96/000000/microphone.png" alt="Start Recording">';
+            }, 10000); // 10 seconds of inactivity
         }
     </script>
 </body>
