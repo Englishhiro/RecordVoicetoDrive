@@ -115,7 +115,7 @@
                 recognition.start();
                 isRecording = true;
                 shouldRestartRecognition = true;
-                recordButton.innerHTML = '<img src="/mnt/data/image.png" alt="Stop Recording">';
+                recordButton.innerHTML = '<img src="https://img.icons8.com/color/48/000000/record.png" alt="Stop Recording">';
             }
         });
 
@@ -157,7 +157,7 @@
                 isRecording = false;
                 recordButton.innerHTML = '<img src="https://img.icons8.com/color/96/000000/microphone.png" alt="Start Recording">';
                 status.innerHTML = 'Recording stopped due to inactivity';
-            }, 5000); // 5 seconds of inactivity
+            }, 15000); // 15 seconds of inactivity
         }
 
         function resetDurationTimeout() {
@@ -168,7 +168,7 @@
                 isRecording = false;
                 recordButton.innerHTML = '<img src="https://img.icons8.com/color/96/000000/microphone.png" alt="Start Recording">';
                 status.innerHTML = 'Recording stopped due to long duration';
-            }, 20000); // 5 minutes duration
+            }, 350000); // 6 minutes duration
         }
     </script>
 </body>
