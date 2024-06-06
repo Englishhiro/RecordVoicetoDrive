@@ -5,26 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voice Recorder with Speech to Text</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            font-size: 1.5em;
+            margin: 20px 0;
+        }
         #status {
-            font-size: 1.2em;
+            font-size: 1em;
             margin-top: 10px;
         }
         .microphone-icon {
-            font-size: 2em;
+            font-size: 1.5em;
             color: red;
         }
         #transcription {
             margin-top: 20px;
             border: 1px solid #ccc;
             padding: 10px;
-            width: 100%;
-            min-height: 50px;
+            width: 90%;
+            min-height: 70px;
+            background-color: #fff;
+        }
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        button img {
+            width: 60px;
+            height: 60px;
         }
     </style>
 </head>
 <body>
-    <h1>Recording trial </h1>
-    <button id="recordButton">Start Trial Recording</button>
+    <h1>Recording trial</h1>
+    <button id="recordButton">
+        <img src="start.png" alt="Start Recording">
+    </button>
     <div id="status"></div>
     <div id="transcription"></div>
 
@@ -34,6 +61,7 @@
         const transcription = document.getElementById('transcription');
         let isRecording = false;
         let recognition;
+        let startTime;
 
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -44,6 +72,7 @@
 
             recognition.onstart = function() {
                 status.innerHTML = 'Recording <span class="microphone-icon">🎤</span>';
+                startTime = new Date().getTime();
             };
 
             recognition.onresult = function(event) {
@@ -63,6 +92,7 @@
                     recognition.start();
                 } else {
                     status.innerHTML = '';
+                    logRecordingData();
                 }
             };
         } else {
@@ -73,13 +103,43 @@
             if (isRecording) {
                 recognition.stop();
                 isRecording = false;
-                recordButton.textContent = 'Start Recording';
+                recordButton.innerHTML = '<img src="start.png" alt="Start Recording">';
             } else {
                 recognition.start();
                 isRecording = true;
-                recordButton.textContent = 'Stop Recording';
+                recordButton.innerHTML = '<img src="stop.png" alt="Stop Recording">';
             }
         });
+
+        function logRecordingData() {
+            const endTime = new Date().getTime();
+            const duration = (endTime - startTime) / 1000;
+            const user = 'User1'; // Replace with dynamic user info if needed
+            const exerciseId = 'exercise1'; // Replace with dynamic exercise ID if needed
+            const transcript = transcription.innerText;
+            const url = 'https://script.google.com/macros/s/AKfycbxIjQxkIUJxaF8Gi97EuiwiIsnxmZB4DemoPpWGrDRqf3e7D8ooHWB2-vFlHBL_DtG5Hg/exec';
+            const data = {
+                timestamp: new Date().toISOString(),
+                user: user,
+                exerciseId: exerciseId,
+                duration: duration,
+                isOfficial: 0,
+                transcript: transcript
+            };
+
+            fetch(url, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(response => {
+                console.log('Data logged successfully:', data);
+            }).catch(error => {
+                console.error('Error logging data:', error);
+            });
+        }
     </script>
 </body>
 </html>
