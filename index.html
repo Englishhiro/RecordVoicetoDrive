@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Recorder with Speech to Text</title>
+    <style>
+        #status {
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        .microphone-icon {
+            font-size: 2em;
+            color: red;
+        }
+        #transcription {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 100%;
+            min-height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Recording trial </h1>
+    <button id="recordButton">Start Trial Recording</button>
+    <div id="status"></div>
+    <div id="transcription"></div>
+
+    <script>
+        const recordButton = document.getElementById('recordButton');
+        const status = document.getElementById('status');
+        const transcription = document.getElementById('transcription');
+        let isRecording = false;
+        let recognition;
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = function() {
+                status.innerHTML = 'Recording <span class="microphone-icon">🎤</span>';
+            };
+
+            recognition.onresult = function(event) {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    transcript += event.results[i][0].transcript;
+                }
+                transcription.innerText = transcript;
+            };
+
+            recognition.onerror = function(event) {
+                console.error(event.error);
+            };
+
+            recognition.onend = function() {
+                if (isRecording) {
+                    recognition.start();
+                } else {
+                    status.innerHTML = '';
+                }
+            };
+        } else {
+            alert('Speech Recognition API is not supported in this browser.');
+        }
+
+        recordButton.addEventListener('click', () => {
+            if (isRecording) {
+                recognition.stop();
+                isRecording = false;
+                recordButton.textContent = 'Start Recording';
+            } else {
+                recognition.start();
+                isRecording = true;
+                recordButton.textContent = 'Stop Recording';
+            }
+        });
+    </script>
+</body>
+</html>
